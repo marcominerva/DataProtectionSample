@@ -14,7 +14,7 @@ builder.Services.AddSqlServer<ApplicationDbContext>(builder.Configuration.GetCon
 builder.Services.AddDataProtection()
     .SetApplicationName("my-application")
 //.PersistKeysToFileSystem(new DirectoryInfo("keys"))   // Keys are stored in %LOCALAPPDATA%\ASP.NET\DataProtection-Keys by default.
-//.PersistKeysToDbContext<ApplicationDbContext>()   // Stores keys in a database.
+//.PersistKeysToDbContext<ApplicationDbContext>()       // Stores keys in a database.
 ;
 
 // Creates a TimeLimitedDataProtector, that is able to protect data with a finite lifetime.
@@ -30,13 +30,13 @@ builder.Services.AddProblemDetails();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseHttpsRedirection();
+
 if (app.Environment.IsDevelopment())
 {
     _ = app.UseSwagger();
     _ = app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
 
 app.MapPost("/api/protect", (Message message, ITimeLimitedDataProtector dataProtector) =>
 {
