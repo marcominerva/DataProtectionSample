@@ -34,8 +34,8 @@ app.UseHttpsRedirection();
 
 if (app.Environment.IsDevelopment())
 {
-    _ = app.UseSwagger();
-    _ = app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.MapPost("/api/protect", (Message message, ITimeLimitedDataProtector dataProtector) =>
