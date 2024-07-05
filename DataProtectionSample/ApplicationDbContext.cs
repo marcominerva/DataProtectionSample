@@ -3,11 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataProtectionSample;
 
-public class ApplicationDbContext : DbContext, IDataProtectionKeyContext
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options), IDataProtectionKeyContext
 {
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
-
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-    {
-    }
 }
