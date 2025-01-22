@@ -1,5 +1,6 @@
 using DataProtectionSample;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,7 @@ builder.Services.AddSingleton(services =>
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();
+await ConfigureDatabaseAsync(app.Services);
 
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
@@ -57,5 +59,13 @@ app.MapPost("/api/unprotect", (Message message, ITimeLimitedDataProtector dataPr
 });
 
 app.Run();
+
+static async Task ConfigureDatabaseAsync(IServiceProvider serviceProvider)
+{
+    using var scope = serviceProvider.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    await dbContext.Database.MigrateAsync();
+}
 
 public record class Message(string Text);
