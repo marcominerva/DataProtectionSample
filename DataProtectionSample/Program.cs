@@ -5,8 +5,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi();
 
 builder.Services.AddSqlServer<ApplicationDbContext>(builder.Configuration.GetConnectionString("SqlConnection"));
 
@@ -36,19 +35,21 @@ app.UseHttpsRedirection();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
-if (app.Environment.IsDevelopment())
+app.MapOpenApi();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    options.SwaggerEndpoint("/openapi/v1.json", app.Environment.ApplicationName);
+});
 
 app.MapPost("/api/protect", (Message message, ITimeLimitedDataProtector dataProtector) =>
 {
-    // The payload will be valid for 1 minutes.
+    // The payload will be valid for 1 minute.
     var protectedString = dataProtector.Protect(message.Text, TimeSpan.FromMinutes(1));
 
     return TypedResults.Ok(new Message(protectedString));
-});
+})
+.WithSummary("Protect the given text")
+.WithDescription("The payload will be valid for 1 minute. After that, trying to unprotect it will result in a CryptographicException");
 
 app.MapPost("/api/unprotect", (Message message, ITimeLimitedDataProtector dataProtector) =>
 {
@@ -56,7 +57,9 @@ app.MapPost("/api/unprotect", (Message message, ITimeLimitedDataProtector dataPr
     var unprotectedString = dataProtector.Unprotect(message.Text);
 
     return TypedResults.Ok(new Message(unprotectedString));
-});
+})
+.WithSummary("Unprotect the given text")
+.WithDescription("If the payload is invalid or the lifetime is expired, a CryptographicException will be thrown");
 
 app.Run();
 
